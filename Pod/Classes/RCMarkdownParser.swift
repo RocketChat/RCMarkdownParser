@@ -11,7 +11,7 @@ import UIKit
 
 private let nonBreakingSpaceCharacter = Character("\u{00A0}")
 
-public struct TSSwiftMarkdownRegex {
+public struct RCMarkdownRegex {
     public static let CodeEscaping = "(?<!\\\\)(?:\\\\\\\\)*+(`+)(.*?[^`].*?)(\\1)(?!`)"
     public static let Escaping = "\\\\."
     public static let Unescaping = "\\\\[0-9a-z]{4}"
@@ -28,7 +28,8 @@ public struct TSSwiftMarkdownRegex {
     public static let Link = "\\[[^\\[]*?\\]\\([^\\)]*\\)"
     
     public static let Monospace = "(`+)(\\s*.*?[^`]\\s*)(\\1)(?!`)"
-    public static let Strong = "(\\*\\*|__)(.+?)(\\1)"
+    public static let Strong = "(?:^|&gt;|[ >_~`])(\\*{1,2})([^\\*\r\n]+)(\\*{1,2})(?:[<_~`]|\\B|\\b|$)"
+    public static let StrongOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let Emphasis = "(\\*|_)(.+?)(\\1)"
     public static let StrongAndEmphasis = "(((\\*\\*\\*)(.|\\s)*(\\*\\*\\*))|((___)(.|\\s)*(___)))"
     
@@ -71,26 +72,6 @@ open class RCMarkdownParser: TSBaseParser {
     public init(withDefaultParsing: Bool = true) {
         super.init()
         
-        defaultAttributes = [NSFontAttributeName: UIFont.systemFont(ofSize: 12), NSParagraphStyleAttributeName: NSParagraphStyle()]
-        headerAttributes = [
-            [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 23)],
-            [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 21)],
-            [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 19)],
-            [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 17)],
-            [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 15)],
-            [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 13)]
-        ]
-        
-        linkAttributes = [
-            NSForegroundColorAttributeName: UIColor.blue,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue as AnyObject
-        ]
-        
-        monospaceAttributes = [
-            NSFontAttributeName: UIFont(name: "Menlo", size: 12) ?? UIFont.systemFont(ofSize: 12),
-            NSForegroundColorAttributeName: UIColor(red: 0.95, green: 0.54, blue: 0.55, alpha: 1)
-        ]
-        
         strongAttributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)]
         emphasisAttributes = [NSFontAttributeName: UIFont.italicSystemFont(ofSize: 12)]
         
@@ -99,50 +80,6 @@ open class RCMarkdownParser: TSBaseParser {
         strongAndEmphasisAttributes = [NSFontAttributeName: strongAndEmphasisFont]
         
         if withDefaultParsing {
-            addCodeEscapingParsing()
-            addEscapingParsing()
-            
-            addNumberedListParsingWithLeadFormattingBlock({ (attributedString, range, level) in
-                RCMarkdownParser.addAttributes(self.numberedListAttributes, atIndex: level - 1, toString: attributedString, range: range)
-                let substring = attributedString.attributedSubstring(from: range).string.replacingOccurrences(of: " ", with: "\(nonBreakingSpaceCharacter)")
-                attributedString.replaceCharacters(in: range, with: "\(substring)")
-            }, textFormattingBlock: { attributedString, range, level in
-                RCMarkdownParser.addAttributes(self.numberedListAttributes, atIndex: level - 1, toString: attributedString, range: range)
-            })
-            
-            addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
-                attributedString.replaceCharacters(in: range, with: "")
-            }, textFormattingBlock: { attributedString, range, level in
-                RCMarkdownParser.addAttributes(self.headerAttributes, atIndex: level - 1, toString: attributedString, range: range)
-            })
-            
-            addListParsingWithLeadFormattingBlock({ attributedString, range, level in
-                RCMarkdownParser.addAttributes(self.listAttributes, atIndex: level - 1, toString: attributedString, range: range)
-                let indentString = String(repeating: String(nonBreakingSpaceCharacter), count: level)
-                attributedString.replaceCharacters(in: range, with: "\(indentString)\u{2022}\u{00A0}")
-            }, textFormattingBlock: { attributedString, range, level in
-                RCMarkdownParser.addAttributes(self.listAttributes, atIndex: level - 1, toString: attributedString, range: range)
-            })
-            
-            addQuoteParsingWithLeadFormattingBlock({ attributedString, range, level in
-                let indentString = String(repeating: "\t", count: level)
-                attributedString.replaceCharacters(in: range, with: indentString)
-            }, textFormattingBlock: { attributedString, range, level in
-                RCMarkdownParser.addAttributes(self.quoteAttributes, atIndex: level - 1, toString: attributedString, range: range)
-            })
-            
-            addImageParsingWithImageFormattingBlock(nil) { attributedString, range in
-                attributedString.addAttributes(self.imageAttributes, range: range)
-            }
-            
-            addLinkParsingWithFormattingBlock { attributedString, range in
-                attributedString.addAttributes(self.linkAttributes, range: range)
-            }
-            
-            addLinkDetectionWithFormattingBlock { attributedString, range in
-                attributedString.addAttributes(self.linkAttributes, range: range)
-            }
-            
             addStrongParsingWithFormattingBlock { attributedString, range in
                 attributedString.enumerateAttributes(in: range, options: []) { attributes, range, _ in
                     if let font = attributes[NSFontAttributeName] as? UIFont, let italicFont = self.emphasisAttributes[NSFontAttributeName] as? UIFont, font == italicFont {
@@ -152,31 +89,11 @@ open class RCMarkdownParser: TSBaseParser {
                     }
                 }
             }
-            
-            addEmphasisParsingWithFormattingBlock { attributedString, range in
-                attributedString.enumerateAttributes(in: range, options: []) { attributes, range, _ in
-                    if let font = attributes[NSFontAttributeName] as? UIFont, let boldFont = self.strongAttributes[NSFontAttributeName] as? UIFont, font == boldFont {
-                        attributedString.addAttributes(self.strongAndEmphasisAttributes, range: range)
-                    } else {
-                        attributedString.addAttributes(self.emphasisAttributes, range: range)
-                    }
-                }
-            }
-            
-            addStrongAndEmphasisParsingWithFormattingBlock { attributedString, range in
-                attributedString.addAttributes(self.strongAndEmphasisAttributes, range: range)
-            }
-            
-            addCodeUnescapingParsingWithFormattingBlock { attributedString, range in
-                attributedString.addAttributes(self.monospaceAttributes, range: range)
-            }
-            
-            addUnescapingParsing()
         }
     }
     
     open func addEscapingParsing() {
-        guard let escapingRegex = TSSwiftMarkdownRegex.regexForString(TSSwiftMarkdownRegex.Escaping) else { return }
+        guard let escapingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Escaping) else { return }
         
         addParsingRuleWithRegularExpression(escapingRegex) { match, attributedString in
             let range = NSRange(location: match.range.location + 1, length: 1)
@@ -187,7 +104,7 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addCodeEscapingParsing() {
-        guard let codingParsingRegex = TSSwiftMarkdownRegex.regexForString(TSSwiftMarkdownRegex.CodeEscaping) else { return }
+        guard let codingParsingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.CodeEscaping) else { return }
         
         addParsingRuleWithRegularExpression(codingParsingRegex) { match, attributedString in
             let range = match.rangeAt(2)
@@ -208,7 +125,7 @@ open class RCMarkdownParser: TSBaseParser {
             return NSString(format: pattern as NSString, maxLevel > 0 ? "\(maxLevel)" : "") as String
         }()
         
-        guard let regex = TSSwiftMarkdownRegex.regexForString(regexString, options: .anchorsMatchLines) else { return }
+        guard let regex = RCMarkdownRegex.regexForString(regexString, options: .anchorsMatchLines) else { return }
         
         addParsingRuleWithRegularExpression(regex) { match, attributedString in
             let level = match.rangeAt(1).length
@@ -218,35 +135,35 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addHeaderParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.Header, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.Header, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.List, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.List, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addNumberedListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.NumberedList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.NumberedList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.Quote, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.Quote, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addShortHeaderParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.ShortHeader, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.ShortHeader, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addShortListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.ShortList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.ShortList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addShortQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(TSSwiftMarkdownRegex.ShortQuote, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+        addLeadParsingWithPattern(RCMarkdownRegex.ShortQuote, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addImageParsingWithImageFormattingBlock(_ formattingBlock: RCMarkdownParserFormattingBlock?, alternativeTextFormattingBlock alternateFormattingBlock: RCMarkdownParserFormattingBlock?) {
-        guard let headerRegex = TSSwiftMarkdownRegex.regexForString(TSSwiftMarkdownRegex.Image, options: .dotMatchesLineSeparators) else { return }
+        guard let headerRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Image, options: .dotMatchesLineSeparators) else { return }
         
         addParsingRuleWithRegularExpression(headerRegex) { match, attributedString in
             let imagePathStart = (attributedString.string as NSString).range(of: "(", options: [], range: match.range).location
@@ -271,7 +188,7 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addLinkParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        guard let linkRegex = TSSwiftMarkdownRegex.regexForString(TSSwiftMarkdownRegex.Link, options: .dotMatchesLineSeparators) else { return }
+        guard let linkRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Link, options: .dotMatchesLineSeparators) else { return }
         
         addParsingRuleWithRegularExpression(linkRegex) { [weak self] match, attributedString in
             let linkStartinResult = (attributedString.string as NSString).range(of: "(", options: .backwards, range: match.range).location
@@ -290,8 +207,8 @@ open class RCMarkdownParser: TSBaseParser {
         }
     }
     
-    fileprivate func addEnclosedParsingWithPattern(_ pattern: String, formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        guard let regex = TSSwiftMarkdownRegex.regexForString(pattern) else { return }
+    fileprivate func addEnclosedParsingWithPattern(_ pattern: String, options: NSRegularExpression.Options = [], formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
+        guard let regex = RCMarkdownRegex.regexForString(pattern) else { return }
         
         addParsingRuleWithRegularExpression(regex) { match, attributedString in
             attributedString.deleteCharacters(in: match.rangeAt(3))
@@ -301,19 +218,19 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addMonospacedParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(TSSwiftMarkdownRegex.Monospace, formattingBlock: formattingBlock)
+        addEnclosedParsingWithPattern(RCMarkdownRegex.Monospace, formattingBlock: formattingBlock)
     }
     
     open func addStrongParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(TSSwiftMarkdownRegex.Strong, formattingBlock: formattingBlock)
+        addEnclosedParsingWithPattern(RCMarkdownRegex.Strong, options: RCMarkdownRegex.StrongOptions, formattingBlock: formattingBlock)
     }
     
     open func addEmphasisParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(TSSwiftMarkdownRegex.Emphasis, formattingBlock: formattingBlock)
+        addEnclosedParsingWithPattern(RCMarkdownRegex.Emphasis, formattingBlock: formattingBlock)
     }
     
     open func addStrongAndEmphasisParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(TSSwiftMarkdownRegex.StrongAndEmphasis, formattingBlock: formattingBlock)
+        addEnclosedParsingWithPattern(RCMarkdownRegex.StrongAndEmphasis, formattingBlock: formattingBlock)
     }
     
     open func addLinkDetectionWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
@@ -329,7 +246,7 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     func unescaped(string: String) -> String? {
-        guard let unescapingRegex = TSSwiftMarkdownRegex.regexForString(TSSwiftMarkdownRegex.Unescaping, options: .dotMatchesLineSeparators) else { return nil }
+        guard let unescapingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Unescaping, options: .dotMatchesLineSeparators) else { return nil }
         
         var location = 0
         let unescapedMutableString = NSMutableString(string: string)
@@ -355,7 +272,7 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addCodeUnescapingParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(TSSwiftMarkdownRegex.CodeEscaping) { attributedString, range in
+        addEnclosedParsingWithPattern(RCMarkdownRegex.CodeEscaping) { attributedString, range in
             let matchString = attributedString.attributedSubstring(from: range).string
             var unescapedString = ""
             for index in 0..<range.length {
@@ -369,7 +286,7 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addUnescapingParsing() {
-        guard let unescapingRegex = TSSwiftMarkdownRegex.regexForString(TSSwiftMarkdownRegex.Unescaping, options: .dotMatchesLineSeparators) else { return }
+        guard let unescapingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Unescaping, options: .dotMatchesLineSeparators) else { return }
         
         addParsingRuleWithRegularExpression(unescapingRegex) { match, attributedString in
             let range = NSRange(location: match.range.location + 1, length: 4)

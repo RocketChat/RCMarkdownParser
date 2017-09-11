@@ -32,6 +32,8 @@ public struct RCMarkdownRegex {
     public static let StrongOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let Italic = "(?:^|&gt;|[ >*~`])(\\_{1,2})([^\\_\r\n]+)(\\_{1,2})(?:[<*~`]|\\B|\\b|$)"
     public static let ItalicOptions: NSRegularExpression.Options = [.anchorsMatchLines]
+    public static let Strike = "(?:^|&gt;|[ >_*`])(\\~{1,2})([^~\r\n]+)(\\~{1,2})(?:[<_*`]|\\B|\\b|$)"
+    public static let StrikeOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     
     public static func regexForString(_ regexString: String, options: NSRegularExpression.Options = []) -> NSRegularExpression? {
         do {
@@ -58,6 +60,7 @@ open class RCMarkdownParser: TSBaseParser {
     open var strongAttributes = [String: Any]()
     open var italicAttributes = [String: Any]()
     open var strongAndItalicAttributes = [String: Any]()
+    open var strikeAttributes = [String: Any]()
     
     open static var standardParser = RCMarkdownParser()
     
@@ -98,6 +101,10 @@ open class RCMarkdownParser: TSBaseParser {
                         attributedString.addAttributes(self.italicAttributes, range: range)
                     }
                 }
+            }
+
+            addStrikeParsingWithFormattingBlock { attributedString, range in
+                attributedString.addAttributes(self.strikeAttributes, range: range)
             }
         }
     }
@@ -238,7 +245,11 @@ open class RCMarkdownParser: TSBaseParser {
     open func addItalicParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         addEnclosedParsingWithPattern(RCMarkdownRegex.Italic, options: RCMarkdownRegex.ItalicOptions, formattingBlock: formattingBlock)
     }
-    
+
+    open func addStrikeParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
+        addEnclosedParsingWithPattern(RCMarkdownRegex.Strike, options: RCMarkdownRegex.StrikeOptions, formattingBlock: formattingBlock)
+    }
+
     open func addLinkDetectionWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         do {
             let linkDataDetector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)

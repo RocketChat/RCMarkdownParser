@@ -23,8 +23,10 @@ public struct RCMarkdownRegex {
     
     public static let Image = "!\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let ImageOptions: NSRegularExpression.Options = [.anchorsMatchLines]
-    public static let Link = "\\[([^\\]]+)\\]\\(((?:http|https):\\/\\/[^\\)]+)\\)"
+    public static let Link = "\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let LinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
+    public static let AlternateLink = "(?:<|&lt;)((?:\(_allowdSchemes)):\\/\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)"
+    public static let AlternateLinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     
     public static let Monospace = "(`+)(\\s*.*?[^`]\\s*)(\\1)(?!`)"
     public static let Strong = "(?:^|&gt;|[ >_~`])(\\*{1,2})([^\\*\r\n]+)(\\*{1,2})(?:[<_~`]|\\B|\\b|$)"
@@ -118,7 +120,11 @@ open class RCMarkdownParser: RCBaseParser {
                 attributedString.addAttributes(self.imageAttributes, range: range)
             })
 
-            addLinkDetectionWithFormattingBlock { attributedString, range in
+            addLinkParsingWithFormattingBlock { attributedString, range in
+                attributedString.addAttributes(self.linkAttributes, range: range)
+            }
+
+            addAlternateLinkParsingWithFormattingBlock { attributedString, range in
                 attributedString.addAttributes(self.linkAttributes, range: range)
             }
         }
@@ -238,6 +244,31 @@ open class RCMarkdownParser: RCBaseParser {
             formattingBlock(attributedString, linkTextRange)
             
             attributedString.deleteCharacters(in: NSRange(location: match.range.location, length: 1))
+        }
+    }
+
+    open func addAlternateLinkParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
+        guard let linkRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.AlternateLink, options: RCMarkdownRegex.AlternateLinkOptions)
+            else { return }
+
+        addParsingRuleWithRegularExpression(linkRegex) { [weak self] match, attributedString in
+            func string() -> NSString { return attributedString.string as NSString }
+            let linkStart = string().range(of: "<", options: .backwards, range: match.range)
+            let linkEnd = string().range(of: "|", options: .backwards, range: match.range)
+            let linkRange = NSRange(location: linkStart.location, length: linkEnd.location - linkStart.location + 1)
+            let linkUrlRange = NSRange(location: linkRange.location + 1, length: linkRange.length - 2)
+            let linkUrlString = string().substring(with: linkUrlRange)
+
+            let linkTextRange = NSRange(location: linkEnd.location + 1, length: match.range.length - linkEnd.location - 2)
+            let linkTextString = string().substring(with: linkTextRange)
+
+            attributedString.deleteCharacters(in: NSRange(location: linkRange.location, length: linkRange.length))
+
+            if let linkUrlString = self?.unescaped(string: linkUrlString), let url = URL(string: linkUrlString) ?? URL(string: linkUrlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? linkUrlString) {
+                attributedString.addAttribute(NSLinkAttributeName, value: url, range: string().range(of: linkTextString))
+            }
+
+            attributedString.deleteCharacters(in: string().range(of: ">"))
         }
     }
     

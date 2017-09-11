@@ -8,13 +8,8 @@ public struct RCMarkdownRegex {
     public static let Escaping = "\\\\."
     public static let Unescaping = "\\\\[0-9a-z]{4}"
     
-    public static let Header = "^(#{1,%@})\\s+(.+)$"
-    public static let ShortHeader = "^(#{1,%@})\\s*([^#].*)$"
-    public static let List = "^( {0,%@})[\\*\\+\\-]\\s+(.+)$"
-    public static let ShortList = "^( {0,%@})[\\*\\+\\-]\\s+([^\\*\\+\\-].*)$"
-    public static let NumberedList = "^( {0,})[0-9]+\\.\\s(.+)$"
-    public static let Quote = "^(\\>{1,%@})\\s+(.+)$"
-    public static let ShortQuote = "^(\\>{1,%@})\\s*([^\\>].*)$"
+    public static let Header = "^(#{1,4}) (([\\S\\w\\d-_\\/\\*\\.,\\\\][ \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]?)+)"
+    public static let HeaderOptions: NSRegularExpression.Options = [.anchorsMatchLines]
 
     public static var allowedSchemes = ["http", "https"]
     fileprivate static var _allowedSchemes: String {
@@ -25,7 +20,7 @@ public struct RCMarkdownRegex {
     public static let ImageOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let Link = "\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let LinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
-    public static let AlternateLink = "(?:<|&lt;)((?:\(_allowdSchemes)):\\/\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)"
+    public static let AlternateLink = "(?:<|&lt;)((?:\(_allowedSchemes)):\\/\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)"
     public static let AlternateLinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     
     public static let Monospace = "(`+)(\\s*.*?[^`]\\s*)(\\1)(?!`)"
@@ -50,7 +45,7 @@ open class RCMarkdownParser: RCBaseParser {
     public typealias RCMarkdownParserFormattingBlock = ((NSMutableAttributedString, NSRange) -> Void)
     public typealias RCMarkdownParserLevelFormattingBlock = ((NSMutableAttributedString, NSRange, Int) -> Void)
     
-    open var headerAttributes = [[String: Any]]()
+    open var headerAttributes = [UInt: [String: Any]]()
     open var listAttributes = [[String: Any]]()
     open var numberedListAttributes = [[String: Any]]()
     open var quoteAttributes = [[String: Any]]()
@@ -127,6 +122,14 @@ open class RCMarkdownParser: RCBaseParser {
             addAlternateLinkParsingWithFormattingBlock { attributedString, range in
                 attributedString.addAttributes(self.linkAttributes, range: range)
             }
+
+            addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
+                attributedString.replaceCharacters(in: range, with: "")
+            }, textFormattingBlock: { attributedString, range, level in
+                if let attributes = self.headerAttributes[UInt(level)] as? [String: Any] {
+                    attributedString.addAttributes(attributes, range: range)
+                }
+            })
         }
     }
     
@@ -174,30 +177,6 @@ open class RCMarkdownParser: RCBaseParser {
     
     open func addHeaderParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
         addLeadParsingWithPattern(RCMarkdownRegex.Header, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
-    }
-    
-    open func addListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(RCMarkdownRegex.List, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
-    }
-    
-    open func addNumberedListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(RCMarkdownRegex.NumberedList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
-    }
-    
-    open func addQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(RCMarkdownRegex.Quote, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
-    }
-    
-    open func addShortHeaderParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(RCMarkdownRegex.ShortHeader, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
-    }
-    
-    open func addShortListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(RCMarkdownRegex.ShortList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
-    }
-    
-    open func addShortQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
-        addLeadParsingWithPattern(RCMarkdownRegex.ShortQuote, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
     
     open func addImageParsingWithImageFormattingBlock(_ formattingBlock: RCMarkdownParserFormattingBlock?, alternativeTextFormattingBlock alternateFormattingBlock: RCMarkdownParserFormattingBlock?) {

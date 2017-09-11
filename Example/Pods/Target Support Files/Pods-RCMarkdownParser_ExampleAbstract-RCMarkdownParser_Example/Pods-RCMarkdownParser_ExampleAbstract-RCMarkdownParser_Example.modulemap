@@ -1,0 +1,6 @@
+framework module Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example {
+  umbrella header "Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

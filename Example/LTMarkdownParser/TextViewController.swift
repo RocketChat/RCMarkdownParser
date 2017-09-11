@@ -1,14 +1,14 @@
 //
 //  TextViewController.swift
-//  LTMarkdownParser
+//  RCMarkdownParser
 //
 //  Created by Rhett Rogers on 4/18/16.
-//  Copyright © 2016 CocoaPods. All rights reserved.
+//  Modified by Matheus Cardoso on 10/09/17.
 //
 
 import Foundation
 import RichTextVC_iOS
-import LTMarkdownParser
+import RCMarkdownParser
 
 class TextViewController: RichTextViewController {
     
@@ -77,7 +77,7 @@ class TextViewController: RichTextViewController {
     func parse() {
         if parsed {
             // Switch to attributedString
-            textView.attributedText = LTMarkdownParser.standardParser.attributedStringFromMarkdown(textView.text)
+            textView.attributedText = RCMarkdownParser.standardParser.attributedStringFromMarkdown(textView.text)
         } else {
             // Switch to markdownString
             textView.attributedText = NSAttributedString(string: textView.attributedText?.markdownString() ?? "")

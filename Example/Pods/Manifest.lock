@@ -1,19 +1,19 @@
 PODS:
-  - LTMarkdownParser (1.0.7)
-  - RichTextVC-iOS (2.0.1)
+  - RCMarkdownParser (2.0.2)
+  - RichTextVC-iOS (2.0.4)
 
 DEPENDENCIES:
-  - LTMarkdownParser (from `../`)
+  - RCMarkdownParser (from `../`)
   - RichTextVC-iOS
 
 EXTERNAL SOURCES:
-  LTMarkdownParser:
-    :path: ../
+  RCMarkdownParser:
+    :path: "../"
 
 SPEC CHECKSUMS:
-  LTMarkdownParser: 74e5ec49c992ea88c6f47993cbb3c6ad1727aca8
-  RichTextVC-iOS: 0c012339b6d28e8be0e8425b42793ef7919deec4
+  RCMarkdownParser: c2d3ea936556f3a237d55d2993488d49959005a0
+  RichTextVC-iOS: 0ee030aae2b57e53073e2787b4d6cc73260dc154
 
-PODFILE CHECKSUM: 235ec6112e571b55e877c70fca6b152bf2e8d7cd
+PODFILE CHECKSUM: 16fa0bfb19243ba292854f116683539557b5e686
 
-COCOAPODS: 1.1.1
+COCOAPODS: 1.2.1

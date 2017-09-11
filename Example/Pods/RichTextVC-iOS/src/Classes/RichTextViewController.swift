@@ -28,7 +28,9 @@ open class RichTextViewController: UIViewController {
 
     fileprivate var disableBold = false
     fileprivate var disableItalic = false
-    
+
+    fileprivate var previousTypingAttributes: [String: Any]?
+
     fileprivate var defaultParagraphStyle: NSParagraphStyle = {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.firstLineHeadIndent = 0
@@ -46,7 +48,10 @@ open class RichTextViewController: UIViewController {
     fileprivate var defaultListAttributes: [String: Any]? {
         guard let regularFont = regularFont else { return nil }
         
-        return [NSFontAttributeName: regularFont, NSParagraphStyleAttributeName: defaultListParagraphStyle]
+        var listAttributes: [String : Any] = [NSFontAttributeName: regularFont, NSParagraphStyleAttributeName: defaultListParagraphStyle]
+        if let textColor = textView.typingAttributes[NSForegroundColorAttributeName] { listAttributes[NSForegroundColorAttributeName] = textColor }
+
+        return listAttributes
     }
 
     deinit {
@@ -130,7 +135,7 @@ open class RichTextViewController: UIViewController {
     /// - parameter atIndex: The index to insert the text at.
     /// - parameter withAttributes: Optional.  Attributes to apply to the added text.  Will use attributes at the index otherwise.
     fileprivate func addText(_ text: String, toTextView textView: UITextView, atIndex index: Int) {
-        let previousTypingAttributes = textView.typingAttributes
+        previousTypingAttributes = textView.typingAttributes
         
         let attributes = defaultListAttributes ?? (index < textView.text.length ? textView.attributedText.attributes(at: index, effectiveRange: nil) : textView.typingAttributes)
         textView.textStorage.beginEditing()
@@ -143,7 +148,7 @@ open class RichTextViewController: UIViewController {
             textView.selectedRange.location += text.length
         }
         
-        textView.typingAttributes = previousTypingAttributes
+        textView.typingAttributes = previousTypingAttributes ?? textView.typingAttributes
         textViewDidChangeSelection(textView)
     }
 
@@ -352,13 +357,13 @@ open class RichTextViewController: UIViewController {
             let previousRange = NSRange(location: range.location - RichTextViewController.bulletedLineStarter.length, length: RichTextViewController.bulletedLineStarter.length)
             let bulletedString = "\n" + RichTextViewController.bulletedLineStarter
             
-            textView.textStorage.beginEditing()
             if let subString = textView.attributedText?.attributedSubstring(from: previousRange).string, subString == RichTextViewController.bulletedLineStarter {
+                textView.textStorage.beginEditing()
                 textView.textStorage.replaceCharacters(in: previousRange, with: NSAttributedString(string: "", attributes: textView.typingAttributes))
+                textView.textStorage.endEditing()
             } else {
                 addText(bulletedString, toTextView: textView, atIndex: range.location)
             }
-            textView.textStorage.endEditing()
             textView.selectedRange = NSRange(location: range.location + (bulletedString as NSString).length, length: 0)
             
             return true
@@ -744,7 +749,9 @@ extension RichTextViewController: UITextViewDelegate {
     
     open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         var changed = false
-        
+
+        previousTypingAttributes = textView.typingAttributes
+
         switch text {
         case "\n":
             changed = addedListsIfActiveInRange(range)
@@ -759,7 +766,9 @@ extension RichTextViewController: UITextViewDelegate {
     
     func textChanged(_ notification: Notification) {
         guard notification.object as? UITextView == textView else { return }
-        
+
+        if let typingAttributes = previousTypingAttributes { textView.typingAttributes = typingAttributes }
+
         if textView.selectedRange.endLocation == textView.text.length {
             textView.typingAttributes[NSParagraphStyleAttributeName] = defaultParagraphStyle
         }

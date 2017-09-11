@@ -1,9 +1,9 @@
 //
 //  AppDelegate.swift
-//  LTMarkdownParser
+//  RCMarkdownParser
 //
 //  Created by Rhett Rogers on 03/24/2016.
-//  Copyright (c) 2016 Rhett Rogers. All rights reserved.
+//  Modified by Matheus Cardoso on 10/09/2017.
 //
 
 import UIKit

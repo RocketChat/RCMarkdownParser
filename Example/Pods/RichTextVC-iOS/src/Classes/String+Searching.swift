@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension String {
+extension NSString {
 
     /// Gets the previous index of a substring contained within the `String`
     ///
@@ -21,12 +21,9 @@ extension String {
             return nil
         }
 
-        let substring = self.substring(to: characters.index(characters.startIndex, offsetBy: fromIndex))
-        if let range = substring.range(of: searchString, options: .backwards) {
-            return substring.characters.distance(from: substring.startIndex, to: range.lowerBound)
-        }
-
-        return nil
+        let substring = self.substring(to: fromIndex) as NSString
+        let range = substring.range(of: searchString as String, options: .backwards)
+        return range.location == NSNotFound ? nil : range.location
     }
 
     /// Gets the next index of a substring contained within the `String`
@@ -40,16 +37,17 @@ extension String {
             return nil
         }
         
-        let substring = self.substring(from: characters.index(characters.startIndex, offsetBy: fromIndex))
-        if let range = substring.range(of: searchString) {
-            return substring.characters.distance(from: substring.startIndex, to: range.lowerBound) + fromIndex
-        }
-
-        return nil
+        let substring = self.substring(from: fromIndex) as NSString
+        let range = substring.range(of: searchString as String)
+        return range.location == NSNotFound ? nil : range.location + fromIndex
     }
 
+}
+
+extension String {
+    
     var length: Int {
         return (self as NSString).length
     }
-
+    
 }

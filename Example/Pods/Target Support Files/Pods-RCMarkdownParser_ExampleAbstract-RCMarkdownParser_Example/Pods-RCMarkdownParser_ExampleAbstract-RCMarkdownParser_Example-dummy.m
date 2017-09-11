@@ -1,0 +1,5 @@
+#import <Foundation/Foundation.h>
+@interface PodsDummy_Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example : NSObject
+@end
+@implementation PodsDummy_Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example
+@end

@@ -30,8 +30,8 @@ public struct RCMarkdownRegex {
     public static let Monospace = "(`+)(\\s*.*?[^`]\\s*)(\\1)(?!`)"
     public static let Strong = "(?:^|&gt;|[ >_~`])(\\*{1,2})([^\\*\r\n]+)(\\*{1,2})(?:[<_~`]|\\B|\\b|$)"
     public static let StrongOptions: NSRegularExpression.Options = [.anchorsMatchLines]
-    public static let Emphasis = "(\\*|_)(.+?)(\\1)"
-    public static let StrongAndEmphasis = "(((\\*\\*\\*)(.|\\s)*(\\*\\*\\*))|((___)(.|\\s)*(___)))"
+    public static let Italic = "(?:^|&gt;|[ >*~`])(\\_{1,2})([^\\_\r\n]+)(\\_{1,2})(?:[<*~`]|\\B|\\b|$)"
+    public static let ItalicOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     
     public static func regexForString(_ regexString: String, options: NSRegularExpression.Options = []) -> NSRegularExpression? {
         do {
@@ -56,8 +56,8 @@ open class RCMarkdownParser: TSBaseParser {
     open var linkAttributes = [String: Any]()
     open var monospaceAttributes = [String: Any]()
     open var strongAttributes = [String: Any]()
-    open var emphasisAttributes = [String: Any]()
-    open var strongAndEmphasisAttributes = [String: Any]()
+    open var italicAttributes = [String: Any]()
+    open var strongAndItalicAttributes = [String: Any]()
     
     open static var standardParser = RCMarkdownParser()
     
@@ -73,19 +73,29 @@ open class RCMarkdownParser: TSBaseParser {
         super.init()
         
         strongAttributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)]
-        emphasisAttributes = [NSFontAttributeName: UIFont.italicSystemFont(ofSize: 12)]
+        italicAttributes = [NSFontAttributeName: UIFont.italicSystemFont(ofSize: 12)]
         
-        var strongAndEmphasisFont = UIFont.systemFont(ofSize: 12)
-        strongAndEmphasisFont = UIFont(descriptor: strongAndEmphasisFont.fontDescriptor.withSymbolicTraits([.traitItalic, .traitBold])!, size: strongAndEmphasisFont.pointSize)
-        strongAndEmphasisAttributes = [NSFontAttributeName: strongAndEmphasisFont]
+        var strongAndItalicFont = UIFont.systemFont(ofSize: 12)
+        strongAndItalicFont = UIFont(descriptor: strongAndItalicFont.fontDescriptor.withSymbolicTraits([.traitItalic, .traitBold])!, size: strongAndItalicFont.pointSize)
+        strongAndItalicAttributes = [NSFontAttributeName: strongAndItalicFont]
         
         if withDefaultParsing {
             addStrongParsingWithFormattingBlock { attributedString, range in
                 attributedString.enumerateAttributes(in: range, options: []) { attributes, range, _ in
-                    if let font = attributes[NSFontAttributeName] as? UIFont, let italicFont = self.emphasisAttributes[NSFontAttributeName] as? UIFont, font == italicFont {
-                        attributedString.addAttributes(self.strongAndEmphasisAttributes, range: range)
+                    if let font = attributes[NSFontAttributeName] as? UIFont, let italicFont = self.italicAttributes[NSFontAttributeName] as? UIFont, font == italicFont {
+                        attributedString.addAttributes(self.strongAndItalicAttributes, range: range)
                     } else {
                         attributedString.addAttributes(self.strongAttributes, range: range)
+                    }
+                }
+            }
+
+            addItalicParsingWithFormattingBlock { attributedString, range in
+                attributedString.enumerateAttributes(in: range, options: []) { attributes, range, _ in
+                    if let font = attributes[NSFontAttributeName] as? UIFont, let boldFont = self.strongAttributes[NSFontAttributeName] as? UIFont, font == boldFont {
+                        attributedString.addAttributes(self.strongAndItalicAttributes, range: range)
+                    } else {
+                        attributedString.addAttributes(self.italicAttributes, range: range)
                     }
                 }
             }
@@ -225,12 +235,8 @@ open class RCMarkdownParser: TSBaseParser {
         addEnclosedParsingWithPattern(RCMarkdownRegex.Strong, options: RCMarkdownRegex.StrongOptions, formattingBlock: formattingBlock)
     }
     
-    open func addEmphasisParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(RCMarkdownRegex.Emphasis, formattingBlock: formattingBlock)
-    }
-    
-    open func addStrongAndEmphasisParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(RCMarkdownRegex.StrongAndEmphasis, formattingBlock: formattingBlock)
+    open func addItalicParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
+        addEnclosedParsingWithPattern(RCMarkdownRegex.Italic, options: RCMarkdownRegex.ItalicOptions, formattingBlock: formattingBlock)
     }
     
     open func addLinkDetectionWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {

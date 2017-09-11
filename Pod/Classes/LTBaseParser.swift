@@ -31,8 +31,7 @@ open class TSBaseParser {
         return attributedStringFromAttributedMarkdownString(NSAttributedString(string: markdown, attributes: attributes))
     }
     
-    open func attributedStringFromAttributedMarkdownString(_ attributedString: NSAttributedString?) -> NSAttributedString? {
-        guard let attributedString = attributedString else { return nil }
+    open func attributedStringFromAttributedMarkdownString(_ attributedString: NSAttributedString) -> NSAttributedString {
         let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
         
         for expressionBlockPair in parsingPairs {

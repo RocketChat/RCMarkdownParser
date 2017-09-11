@@ -1,27 +1,17 @@
-//
-//  TSBaseParser.swift
-//  LTMarkdownParser
-//
-//  Created by Rhett Rogers on 3/24/16.
-//  Copyright © 2016 CocoaPods. All rights reserved.
-//
-
 import Foundation
 
-open class TSBaseParser {
+open class RCBaseParser {
 
-    public typealias LTMarkdownParserMatchBlock = ((NSTextCheckingResult, NSMutableAttributedString) -> Void)
+    public typealias RCMarkdownParserMatchBlock = ((NSTextCheckingResult, NSMutableAttributedString) -> Void)
     
-    struct TSExpressionBlockPair {
-        
+    struct RCExpressionBlockPair {
         var regularExpression: NSRegularExpression
-        var block: LTMarkdownParserMatchBlock
-        
+        var block: RCMarkdownParserMatchBlock
     }
     
     open var defaultAttributes = [String: Any]()
     
-    fileprivate var parsingPairs = [TSExpressionBlockPair]()
+    fileprivate var parsingPairs = [RCExpressionBlockPair]()
     
     open func attributedStringFromMarkdown(_ markdown: String) -> NSAttributedString? {
         return attributedStringFromMarkdown(markdown, attributes: defaultAttributes)
@@ -41,11 +31,11 @@ open class TSBaseParser {
         return mutableAttributedString
     }
     
-    func parseExpressionBlockPairForMutableString(_ mutableAttributedString: NSMutableAttributedString, expressionBlockPair: TSExpressionBlockPair) {
+    func parseExpressionBlockPairForMutableString(_ mutableAttributedString: NSMutableAttributedString, expressionBlockPair: RCExpressionBlockPair) {
         parseExpressionForMutableString(mutableAttributedString, expression: expressionBlockPair.regularExpression, block: expressionBlockPair.block)
     }
     
-    func parseExpressionForMutableString(_ mutableAttributedString: NSMutableAttributedString, expression: NSRegularExpression, block: LTMarkdownParserMatchBlock) {
+    func parseExpressionForMutableString(_ mutableAttributedString: NSMutableAttributedString, expression: NSRegularExpression, block: RCMarkdownParserMatchBlock) {
         var location = 0
         
         while let match = expression.firstMatch(in: mutableAttributedString.string, options: .withoutAnchoringBounds, range: NSRange(location: location, length: mutableAttributedString.length - location)) {
@@ -56,8 +46,8 @@ open class TSBaseParser {
         }
     }
     
-    open func addParsingRuleWithRegularExpression(_ regularExpression: NSRegularExpression, block: @escaping LTMarkdownParserMatchBlock) {
-        parsingPairs.append(TSExpressionBlockPair(regularExpression: regularExpression, block: block))
+    open func addParsingRuleWithRegularExpression(_ regularExpression: NSRegularExpression, block: @escaping RCMarkdownParserMatchBlock) {
+        parsingPairs.append(RCExpressionBlockPair(regularExpression: regularExpression, block: block))
     }
     
 }

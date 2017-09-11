@@ -1,11 +1,3 @@
-//
-//  RCMarkdownParser.swift
-//  RCMarkdownParser
-//
-//  Created by Rhett Rogers on 3/24/16.
-//  Modified by Matheus Cardoso on 10/09/17.
-//
-
 import Foundation
 import UIKit
 
@@ -23,9 +15,16 @@ public struct RCMarkdownRegex {
     public static let NumberedList = "^( {0,})[0-9]+\\.\\s(.+)$"
     public static let Quote = "^(\\>{1,%@})\\s+(.+)$"
     public static let ShortQuote = "^(\\>{1,%@})\\s*([^\\>].*)$"
+
+    public static var allowedSchemes = ["http", "https"]
+    fileprivate static var _allowedSchemes: String {
+        return allowedSchemes.joined(separator: "|")
+    }
     
-    public static let Image = "\\!\\[[^\\[]*?\\]\\(\\S*\\)"
-    public static let Link = "\\[[^\\[]*?\\]\\([^\\)]*\\)"
+    public static let Image = "!\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
+    public static let ImageOptions: NSRegularExpression.Options = [.anchorsMatchLines]
+    public static let Link = "\\[([^\\]]+)\\]\\(((?:http|https):\\/\\/[^\\)]+)\\)"
+    public static let LinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     
     public static let Monospace = "(`+)(\\s*.*?[^`]\\s*)(\\1)(?!`)"
     public static let Strong = "(?:^|&gt;|[ >_~`])(\\*{1,2})([^\\*\r\n]+)(\\*{1,2})(?:[<_~`]|\\B|\\b|$)"
@@ -44,7 +43,7 @@ public struct RCMarkdownRegex {
     }
 }
 
-open class RCMarkdownParser: TSBaseParser {
+open class RCMarkdownParser: RCBaseParser {
     
     public typealias RCMarkdownParserFormattingBlock = ((NSMutableAttributedString, NSRange) -> Void)
     public typealias RCMarkdownParserLevelFormattingBlock = ((NSMutableAttributedString, NSRange, Int) -> Void)
@@ -61,6 +60,12 @@ open class RCMarkdownParser: TSBaseParser {
     open var italicAttributes = [String: Any]()
     open var strongAndItalicAttributes = [String: Any]()
     open var strikeAttributes = [String: Any]()
+
+    public typealias DownloadImageClosure = (UIImage?)->Void
+    open var downloadImage: (_ path: String, _ completion: DownloadImageClosure?) -> Void = {
+        _,completion in
+        completion?(nil)
+    }
     
     open static var standardParser = RCMarkdownParser()
     
@@ -105,6 +110,16 @@ open class RCMarkdownParser: TSBaseParser {
 
             addStrikeParsingWithFormattingBlock { attributedString, range in
                 attributedString.addAttributes(self.strikeAttributes, range: range)
+            }
+
+            addImageParsingWithImageFormattingBlock({ attributedString, range in
+                attributedString.addAttributes(self.imageAttributes, range: range)
+            }, alternativeTextFormattingBlock: { attributedString, range in
+                attributedString.addAttributes(self.imageAttributes, range: range)
+            })
+
+            addLinkDetectionWithFormattingBlock { attributedString, range in
+                attributedString.addAttributes(self.linkAttributes, range: range)
             }
         }
     }
@@ -180,32 +195,34 @@ open class RCMarkdownParser: TSBaseParser {
     }
     
     open func addImageParsingWithImageFormattingBlock(_ formattingBlock: RCMarkdownParserFormattingBlock?, alternativeTextFormattingBlock alternateFormattingBlock: RCMarkdownParserFormattingBlock?) {
-        guard let headerRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Image, options: .dotMatchesLineSeparators) else { return }
+        guard let headerRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Image, options: RCMarkdownRegex.ImageOptions) else { return }
         
         addParsingRuleWithRegularExpression(headerRegex) { match, attributedString in
             let imagePathStart = (attributedString.string as NSString).range(of: "(", options: [], range: match.range).location
             let linkRange = NSRange(location: imagePathStart, length: match.range.length + match.range.location - imagePathStart - 1)
             let imagePath = (attributedString.string as NSString).substring(with: NSRange(location: linkRange.location + 1, length: linkRange.length - 1))
-            
-            if let image = UIImage(named: imagePath) {
-                let imageAttatchment = NSTextAttachment()
-                imageAttatchment.image = image
-                imageAttatchment.bounds = CGRect(x: 0, y: -5, width: image.size.width, height: image.size.height)
-                let imageString = NSAttributedString(attachment: imageAttatchment)
-                attributedString.replaceCharacters(in: match.range, with: imageString)
-                formattingBlock?(attributedString, NSRange(location: match.range.location, length: imageString.length))
-            } else {
-                let linkTextEndLocation = (attributedString.string as NSString).range(of: "]", options: [], range: match.range).location
-                let linkTextRange = NSRange(location: match.range.location + 2, length: linkTextEndLocation - match.range.location - 2)
-                let alternativeText = (attributedString.string as NSString).substring(with: linkTextRange)
-                attributedString.replaceCharacters(in: match.range, with: alternativeText)
-                alternateFormattingBlock?(attributedString, NSRange(location: match.range.location, length: (alternativeText as NSString).length))
+
+            self.downloadImage(imagePath) { image in
+                if let image = image {
+                    let imageAttatchment = NSTextAttachment()
+                    imageAttatchment.image = image
+                    imageAttatchment.bounds = CGRect(x: 0, y: -5, width: image.size.width, height: image.size.height)
+                    let imageString = NSAttributedString(attachment: imageAttatchment)
+                    attributedString.replaceCharacters(in: match.range, with: imageString)
+                    formattingBlock?(attributedString, NSRange(location: match.range.location, length: imageString.length))
+                } else {
+                    let linkTextEndLocation = (attributedString.string as NSString).range(of: "]", options: [], range: match.range).location
+                    let linkTextRange = NSRange(location: match.range.location + 2, length: linkTextEndLocation - match.range.location - 2)
+                    let alternativeText = (attributedString.string as NSString).substring(with: linkTextRange)
+                    attributedString.replaceCharacters(in: match.range, with: alternativeText)
+                    alternateFormattingBlock?(attributedString, NSRange(location: match.range.location, length: (alternativeText as NSString).length))
+                }
             }
         }
     }
     
     open func addLinkParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        guard let linkRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Link, options: .dotMatchesLineSeparators) else { return }
+        guard let linkRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Link, options: RCMarkdownRegex.LinkOptions) else { return }
         
         addParsingRuleWithRegularExpression(linkRegex) { [weak self] match, attributedString in
             let linkStartinResult = (attributedString.string as NSString).range(of: "(", options: .backwards, range: match.range).location

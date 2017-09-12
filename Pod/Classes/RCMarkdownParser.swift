@@ -13,6 +13,8 @@ public struct RCMarkdownRegex {
 
     public static let Quote = "(^>)(.*)$"
     public static let QuoteOptions: NSRegularExpression.Options = [.anchorsMatchLines]
+    public static let QuoteBlock = "(>>>)\n+([\\s\\S]*?)\n+(<<<)"
+    public static let QuoteBlockOptions: NSRegularExpression.Options = [.anchorsMatchLines]
 
     public static var allowedSchemes = ["http", "https"]
     fileprivate static var _allowedSchemes: String {
@@ -53,12 +55,16 @@ open class RCMarkdownParser: RCBaseParser {
     public typealias RCMarkdownParserLevelFormattingBlock = ((NSMutableAttributedString, NSRange, Int) -> Void)
     
     open var headerAttributes = [UInt: [String: Any]]()
+
     open var quoteAttributes = [String: Any]()
+    open var quoteBlockAttributes = [String: Any]()
     
     open var imageAttributes = [String: Any]()
     open var linkAttributes = [String: Any]()
+
     open var inlineCodeAttributes = [String: Any]()
     open var codeAttributes = [String: Any]()
+
     open var strongAttributes = [String: Any]()
     open var italicAttributes = [String: Any]()
     open var strongAndItalicAttributes = [String: Any]()
@@ -99,6 +105,10 @@ open class RCMarkdownParser: RCBaseParser {
                     attributedString.addAttributes(attributes, range: range)
                 }
             })
+
+            addQuoteBlockParsingWithFormattingBlock { attributedString, range in
+                attributedString.addAttributes(self.quoteBlockAttributes, range: range)
+            }
 
             addQuoteParsingWithLeadFormattingBlock({ attributedString, range, level in
                 attributedString.replaceCharacters(in: range, with: "")
@@ -202,6 +212,10 @@ open class RCMarkdownParser: RCBaseParser {
 
     open func addQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
         addLeadParsingWithPattern(RCMarkdownRegex.Quote, maxLevel: 1, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+    }
+
+    open func addQuoteBlockParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
+        addEnclosedParsingWithPattern(RCMarkdownRegex.QuoteBlock, formattingBlock: formattingBlock)
     }
 
     open func addImageParsingWithImageFormattingBlock(_ formattingBlock: RCMarkdownParserFormattingBlock?, alternativeTextFormattingBlock alternateFormattingBlock: RCMarkdownParserFormattingBlock?) {
@@ -343,30 +357,4 @@ open class RCMarkdownParser: RCBaseParser {
         let char = Character(UnicodeScalar(Int(strtoul(sub, nil, 16)))!)
         return "\(char)"
     }
-    
-    open func addCodeUnescapingParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        addEnclosedParsingWithPattern(RCMarkdownRegex.CodeEscaping) { attributedString, range in
-            let matchString = attributedString.attributedSubstring(from: range).string
-            var unescapedString = ""
-            for index in 0..<range.length {
-                guard index * 4 < range.length else { break }
-                
-                unescapedString = "\(unescapedString)\(RCMarkdownParser.stringWithHexaString(matchString, atIndex: index * 4))"
-            }
-            attributedString.replaceCharacters(in: range, with: unescapedString)
-            formattingBlock(attributedString, NSRange(location: range.location, length: (unescapedString as NSString).length))
-        }
-    }
-    
-    open func addUnescapingParsing() {
-        guard let unescapingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Unescaping, options: .dotMatchesLineSeparators) else { return }
-        
-        addParsingRuleWithRegularExpression(unescapingRegex) { match, attributedString in
-            let range = NSRange(location: match.range.location + 1, length: 4)
-            let matchString = attributedString.attributedSubstring(from: range).string
-            let unescapedString = RCMarkdownParser.stringWithHexaString(matchString, atIndex: 0)
-            attributedString.replaceCharacters(in: match.range, with: unescapedString)
-        }
-    }
-    
 }

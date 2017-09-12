@@ -101,7 +101,7 @@ open class RCMarkdownParser: RCBaseParser {
             addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
                 attributedString.replaceCharacters(in: range, with: "")
             }, textFormattingBlock: { attributedString, range, level in
-                if let attributes = self.headerAttributes[UInt(level)] as? [String: Any] {
+                if let attributes = self.headerAttributes[UInt(level)] {
                     attributedString.addAttributes(attributes, range: range)
                 }
             })

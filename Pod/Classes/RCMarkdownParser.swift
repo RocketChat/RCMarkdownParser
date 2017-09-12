@@ -25,6 +25,8 @@ public struct RCMarkdownRegex {
     
     public static let InlineCode = "(?:^|&gt;|[ >_*~])(\\`)([^`\r\n]+)(\\`)(?:[<_*~]|\\B|\\b|$)"
     public static let InlineCodeOptions: NSRegularExpression.Options = [.anchorsMatchLines]
+    public static let Code = "(```)(?:[a-zA-Z]+)?((?:.|\r|\n)*?)(```)"
+    public static let CodeOptions: NSRegularExpression.Options = [.anchorsMatchLines]
 
     public static let Strong = "(?:^|&gt;|[ >_~`])(\\*{1,2})([^\\*\r\n]+)(\\*{1,2})(?:[<_~`]|\\B|\\b|$)"
     public static let StrongOptions: NSRegularExpression.Options = [.anchorsMatchLines]
@@ -55,6 +57,7 @@ open class RCMarkdownParser: RCBaseParser {
     open var imageAttributes = [String: Any]()
     open var linkAttributes = [String: Any]()
     open var inlineCodeAttributes = [String: Any]()
+    open var codeAttributes = [String: Any]()
     open var strongAttributes = [String: Any]()
     open var italicAttributes = [String: Any]()
     open var strongAndItalicAttributes = [String: Any]()
@@ -90,6 +93,10 @@ open class RCMarkdownParser: RCBaseParser {
 
             addInlineCodeParsingWithFormattingBlock { attributedString, range in
                 attributedString.addAttributes(self.inlineCodeAttributes, range: range)
+            }
+
+            addCodeParsingWithFormattingBlock { attributedString, range in
+                attributedString.addAttributes(self.codeAttributes, range: range)
             }
 
             addStrongParsingWithFormattingBlock { attributedString, range in
@@ -270,6 +277,10 @@ open class RCMarkdownParser: RCBaseParser {
     
     open func addInlineCodeParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         addEnclosedParsingWithPattern(RCMarkdownRegex.InlineCode, options: RCMarkdownRegex.InlineCodeOptions, formattingBlock: formattingBlock)
+    }
+
+    open func addCodeParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
+        addEnclosedParsingWithPattern(RCMarkdownRegex.Code, formattingBlock: formattingBlock)
     }
     
     open func addStrongParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {

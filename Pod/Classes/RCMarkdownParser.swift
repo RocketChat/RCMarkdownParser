@@ -11,6 +11,9 @@ public struct RCMarkdownRegex {
     public static let Header = "^(#{1,4}) (([\\S\\w\\d-_\\/\\*\\.,\\\\][ \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]?)+)"
     public static let HeaderOptions: NSRegularExpression.Options = [.anchorsMatchLines]
 
+    public static let Quote = "(^>)(.*)$"
+    public static let QuoteOptions: NSRegularExpression.Options = [.anchorsMatchLines]
+
     public static var allowedSchemes = ["http", "https"]
     fileprivate static var _allowedSchemes: String {
         return allowedSchemes.joined(separator: "|")
@@ -50,9 +53,7 @@ open class RCMarkdownParser: RCBaseParser {
     public typealias RCMarkdownParserLevelFormattingBlock = ((NSMutableAttributedString, NSRange, Int) -> Void)
     
     open var headerAttributes = [UInt: [String: Any]]()
-    open var listAttributes = [[String: Any]]()
-    open var numberedListAttributes = [[String: Any]]()
-    open var quoteAttributes = [[String: Any]]()
+    open var quoteAttributes = [String: Any]()
     
     open var imageAttributes = [String: Any]()
     open var linkAttributes = [String: Any]()
@@ -90,6 +91,20 @@ open class RCMarkdownParser: RCBaseParser {
         strongAndItalicAttributes = [NSFontAttributeName: strongAndItalicFont]
         
         if withDefaultParsing {
+
+            addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
+                attributedString.replaceCharacters(in: range, with: "")
+            }, textFormattingBlock: { attributedString, range, level in
+                if let attributes = self.headerAttributes[UInt(level)] as? [String: Any] {
+                    attributedString.addAttributes(attributes, range: range)
+                }
+            })
+
+            addQuoteParsingWithLeadFormattingBlock({ attributedString, range, level in
+                attributedString.replaceCharacters(in: range, with: "")
+            }, textFormattingBlock: { attributedString, range, level in
+                attributedString.addAttributes(self.quoteAttributes, range: range)
+            })
 
             addInlineCodeParsingWithFormattingBlock { attributedString, range in
                 attributedString.addAttributes(self.inlineCodeAttributes, range: range)
@@ -136,14 +151,6 @@ open class RCMarkdownParser: RCBaseParser {
             addAlternateLinkParsingWithFormattingBlock { attributedString, range in
                 attributedString.addAttributes(self.linkAttributes, range: range)
             }
-
-            addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
-                attributedString.replaceCharacters(in: range, with: "")
-            }, textFormattingBlock: { attributedString, range, level in
-                if let attributes = self.headerAttributes[UInt(level)] as? [String: Any] {
-                    attributedString.addAttributes(attributes, range: range)
-                }
-            })
         }
     }
     
@@ -192,7 +199,11 @@ open class RCMarkdownParser: RCBaseParser {
     open func addHeaderParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
         addLeadParsingWithPattern(RCMarkdownRegex.Header, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
-    
+
+    open func addQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
+        addLeadParsingWithPattern(RCMarkdownRegex.Quote, maxLevel: 1, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+    }
+
     open func addImageParsingWithImageFormattingBlock(_ formattingBlock: RCMarkdownParserFormattingBlock?, alternativeTextFormattingBlock alternateFormattingBlock: RCMarkdownParserFormattingBlock?) {
         guard let headerRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Image, options: RCMarkdownRegex.ImageOptions) else { return }
         

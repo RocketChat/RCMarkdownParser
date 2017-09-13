@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		17D1E0A9480E50249F5A872A /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95704EE6DF96A8FDEB415EE7 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */; };
+		4E107D3CEEA5189E0FC89B51 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FB01CB552ECD492E92D15A /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */; };
 		590B8BD21CA5A10F00890A98 /* RCMarkdownParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590B8BD11CA5A10F00890A98 /* RCMarkdownParserTests.swift */; };
 		590E00B41CA9C3950069EEA5 /* markdown.png in Resources */ = {isa = PBXBuildFile; fileRef = 590E00B31CA9C3950069EEA5 /* markdown.png */; };
 		590E00B51CA9C3950069EEA5 /* markdown.png in Resources */ = {isa = PBXBuildFile; fileRef = 590E00B31CA9C3950069EEA5 /* markdown.png */; };
@@ -20,8 +20,7 @@
 		59BE00F91CBEDBCF0053D12D /* NSAttributedString+MarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BE00F71CBEDBBE0053D12D /* NSAttributedString+MarkdownTests.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		9A1AF421FACAD7E10285CDAA /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CC7033BB09AFDB7E3A0CF0E /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */; };
-		CBADE5ED1D6AA06234911B89 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69F1ED131712298F9ED60D6E /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */; };
+		8BABFED8EA115E70446CBDB1 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C258E0867E181B73424BAB52 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,11 +35,8 @@
 
 /* Begin PBXFileReference section */
 		2BE0431602B11DE54CEA5CA5 /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		2E3378832E9A3776B5910581 /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		3857A7A2359DDC6F99A76901 /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.release.xcconfig"; sourceTree = "<group>"; };
 		47CE1C2E5460FC64E22F023D /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		54E3089A9EDE6A476949EDC8 /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		57E977CF6DEC6D24A0514689 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		590B8BD11CA5A10F00890A98 /* RCMarkdownParserTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RCMarkdownParserTests.swift; sourceTree = "<group>"; };
 		590E00B31CA9C3950069EEA5 /* markdown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = markdown.png; sourceTree = "<group>"; };
 		590E00B61CA9C39E0069EEA5 /* markdown_test_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = markdown_test_image.png; sourceTree = "<group>"; };
@@ -55,13 +51,10 @@
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* RCMarkdownParser_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RCMarkdownParser_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		69F1ED131712298F9ED60D6E /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8CC7033BB09AFDB7E3A0CF0E /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		91A021B07B89692143E65886 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		95704EE6DF96A8FDEB415EE7 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A889DEB40D17D74DB6D3296F /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.release.xcconfig"; sourceTree = "<group>"; };
-		AF1EE4F65A4DDF444788C7DA /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		CDE1E6D2105B0719191AED67 /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests/Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		C0FB01CB552ECD492E92D15A /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C258E0867E181B73424BAB52 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1D2DCA1B1374A026A68465C /* RCMarkdownParser.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = RCMarkdownParser.podspec; path = ../RCMarkdownParser.podspec; sourceTree = "<group>"; };
 		E6C92497C51D71555E627466 /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -71,7 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17D1E0A9480E50249F5A872A /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework in Frameworks */,
+				4E107D3CEEA5189E0FC89B51 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,8 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBADE5ED1D6AA06234911B89 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework in Frameworks */,
-				9A1AF421FACAD7E10285CDAA /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework in Frameworks */,
+				8BABFED8EA115E70446CBDB1 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,10 +156,8 @@
 		6A3F42632880ADEA9AA95A03 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				57E977CF6DEC6D24A0514689 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */,
-				69F1ED131712298F9ED60D6E /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */,
-				95704EE6DF96A8FDEB415EE7 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */,
-				8CC7033BB09AFDB7E3A0CF0E /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */,
+				C0FB01CB552ECD492E92D15A /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Example.framework */,
+				C258E0867E181B73424BAB52 /* Pods_RCMarkdownParser_ExampleAbstract_RCMarkdownParser_Tests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -175,10 +165,6 @@
 		9A942ABDC47444F876E1BFE8 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				2E3378832E9A3776B5910581 /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.debug.xcconfig */,
-				3857A7A2359DDC6F99A76901 /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Example.release.xcconfig */,
-				CDE1E6D2105B0719191AED67 /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.debug.xcconfig */,
-				AF1EE4F65A4DDF444788C7DA /* Pods-LTMarkdownParser_ExampleAbstract-LTMarkdownParser_Tests.release.xcconfig */,
 				54E3089A9EDE6A476949EDC8 /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.debug.xcconfig */,
 				A889DEB40D17D74DB6D3296F /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example.release.xcconfig */,
 				E6C92497C51D71555E627466 /* Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests.debug.xcconfig */,
@@ -320,13 +306,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		7B76790D26D7E04AB2334867 /* [CP] Check Pods Manifest.lock */ = {
@@ -335,13 +324,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		BFD5166EAE21DCE32D841851 /* [CP] Copy Pods Resources */ = {
@@ -365,9 +357,14 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/RCMarkdownParser/RCMarkdownParser.framework",
+				"${BUILT_PRODUCTS_DIR}/RichTextVC-iOS/RichTextVC_iOS.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RCMarkdownParser.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RichTextVC_iOS.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -380,9 +377,12 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests/Pods-RCMarkdownParser_ExampleAbstract-RCMarkdownParser_Tests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/RCMarkdownParser/RCMarkdownParser.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RCMarkdownParser.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

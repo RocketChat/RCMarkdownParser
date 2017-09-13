@@ -7,7 +7,7 @@ public struct RCMarkdownRegex {
     public static let CodeEscaping = "(?<!\\\\)(?:\\\\\\\\)*+(`+)(.*?[^`].*?)(\\1)(?!`)"
     public static let Escaping = "\\\\."
     public static let Unescaping = "\\\\[0-9a-z]{4}"
-    
+
     public static let Header = "^(#{1,4}) (([\\S\\w\\d-_\\/\\*\\.,\\\\][ \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]?)+)"
     public static let HeaderOptions: NSRegularExpression.Options = [.anchorsMatchLines]
 
@@ -20,14 +20,14 @@ public struct RCMarkdownRegex {
     fileprivate static var _allowedSchemes: String {
         return allowedSchemes.joined(separator: "|")
     }
-    
+
     public static let Image = "!\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let ImageOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let Link = "\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let LinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let AlternateLink = "(?:<|&lt;)((?:\(_allowedSchemes)):\\/\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)"
     public static let AlternateLinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
-    
+
     public static let InlineCode = "(?:^|&gt;|[ >_*~])(\\`)([^`\r\n]+)(\\`)(?:[<_*~]|\\B|\\b|$)"
     public static let InlineCodeOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let Code = "(```)(?:[a-zA-Z]+)?((?:.|\r|\n)*?)(```)"
@@ -39,7 +39,7 @@ public struct RCMarkdownRegex {
     public static let ItalicOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let Strike = "(?:^|&gt;|[ >_*`])(\\~{1,2})([^~\r\n]+)(\\~{1,2})(?:[<_*`]|\\B|\\b|$)"
     public static let StrikeOptions: NSRegularExpression.Options = [.anchorsMatchLines]
-    
+
     public static func regexForString(_ regexString: String, options: NSRegularExpression.Options = []) -> NSRegularExpression? {
         do {
             return try NSRegularExpression(pattern: regexString, options: options)
@@ -50,15 +50,15 @@ public struct RCMarkdownRegex {
 }
 
 open class RCMarkdownParser: RCBaseParser {
-    
+
     public typealias RCMarkdownParserFormattingBlock = ((NSMutableAttributedString, NSRange) -> Void)
     public typealias RCMarkdownParserLevelFormattingBlock = ((NSMutableAttributedString, NSRange, Int) -> Void)
-    
+
     open var headerAttributes = [UInt: [String: Any]]()
 
     open var quoteAttributes = [String: Any]()
     open var quoteBlockAttributes = [String: Any]()
-    
+
     open var imageAttributes = [String: Any]()
     open var linkAttributes = [String: Any]()
 
@@ -75,27 +75,27 @@ open class RCMarkdownParser: RCBaseParser {
         _,completion in
         completion?(nil)
     }
-    
+
     open static var standardParser = RCMarkdownParser()
-    
+
     class func addAttributes(_ attributesArray: [[String: Any]], atIndex level: Int, toString attributedString: NSMutableAttributedString, range: NSRange) {
         guard !attributesArray.isEmpty else { return }
-        
+
         guard let newAttributes = level < attributesArray.count && level >= 0 ? attributesArray[level] : attributesArray.last else { return }
-        
+
         attributedString.addAttributes(newAttributes, range: range)
     }
-    
+
     public init(withDefaultParsing: Bool = true) {
         super.init()
-        
+
         strongAttributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 12)]
         italicAttributes = [NSFontAttributeName: UIFont.italicSystemFont(ofSize: 12)]
-        
+
         var strongAndItalicFont = UIFont.systemFont(ofSize: 12)
         strongAndItalicFont = UIFont(descriptor: strongAndItalicFont.fontDescriptor.withSymbolicTraits([.traitItalic, .traitBold])!, size: strongAndItalicFont.pointSize)
         strongAndItalicAttributes = [NSFontAttributeName: strongAndItalicFont]
-        
+
         if withDefaultParsing {
 
             addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
@@ -163,10 +163,10 @@ open class RCMarkdownParser: RCBaseParser {
             }
         }
     }
-    
+
     open func addEscapingParsing() {
         guard let escapingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Escaping) else { return }
-        
+
         addParsingRuleWithRegularExpression(escapingRegex) { match, attributedString in
             let range = NSRange(location: match.range.location + 1, length: 1)
             let matchString = attributedString.attributedSubstring(from: range).string as NSString
@@ -174,14 +174,14 @@ open class RCMarkdownParser: RCBaseParser {
             attributedString.replaceCharacters(in: range, with: escapedString)
         }
     }
-    
+
     open func addCodeEscapingParsing() {
         guard let codingParsingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.CodeEscaping) else { return }
-        
+
         addParsingRuleWithRegularExpression(codingParsingRegex) { match, attributedString in
             let range = match.rangeAt(2)
             let matchString = attributedString.attributedSubstring(from: range).string as NSString
-            
+
             var escapedString = ""
             for index in 0..<range.length {
                 escapedString = "\(escapedString)\(NSString(format: "%04x", matchString.character(at: index)))"
@@ -190,22 +190,22 @@ open class RCMarkdownParser: RCBaseParser {
             attributedString.replaceCharacters(in: range, with: escapedString)
         }
     }
-    
+
     fileprivate func addLeadParsingWithPattern(_ pattern: String, maxLevel: Int?, leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
         let regexString: String = {
             let maxLevel: Int = maxLevel ?? 0
             return NSString(format: pattern as NSString, maxLevel > 0 ? "\(maxLevel)" : "") as String
         }()
-        
+
         guard let regex = RCMarkdownRegex.regexForString(regexString, options: .anchorsMatchLines) else { return }
-        
+
         addParsingRuleWithRegularExpression(regex) { match, attributedString in
             let level = match.rangeAt(1).length
             formattingBlock?(attributedString, match.rangeAt(2), level)
             leadFormattingBlock(attributedString, NSRange(location: match.rangeAt(1).location, length: match.rangeAt(2).location - match.rangeAt(1).location), level)
         }
     }
-    
+
     open func addHeaderParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
         addLeadParsingWithPattern(RCMarkdownRegex.Header, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
@@ -220,7 +220,7 @@ open class RCMarkdownParser: RCBaseParser {
 
     open func addImageParsingWithImageFormattingBlock(_ formattingBlock: RCMarkdownParserFormattingBlock?, alternativeTextFormattingBlock alternateFormattingBlock: RCMarkdownParserFormattingBlock?) {
         guard let headerRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Image, options: RCMarkdownRegex.ImageOptions) else { return }
-        
+
         addParsingRuleWithRegularExpression(headerRegex) { match, attributedString in
             let imagePathStart = (attributedString.string as NSString).range(of: "(", options: [], range: match.range).location
             let linkRange = NSRange(location: imagePathStart, length: match.range.length + match.range.location - imagePathStart - 1)
@@ -244,23 +244,23 @@ open class RCMarkdownParser: RCBaseParser {
             }
         }
     }
-    
+
     open func addLinkParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         guard let linkRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Link, options: RCMarkdownRegex.LinkOptions) else { return }
-        
+
         addParsingRuleWithRegularExpression(linkRegex) { [weak self] match, attributedString in
             let linkStartinResult = (attributedString.string as NSString).range(of: "(", options: .backwards, range: match.range).location
             let linkRange = NSRange(location: linkStartinResult, length: match.range.length + match.range.location - linkStartinResult - 1)
             let linkUrlString = (attributedString.string as NSString).substring(with: NSRange(location: linkRange.location + 1, length: linkRange.length - 1))
-            
+
             let linkTextRange = NSRange(location: match.range.location + 1, length: linkStartinResult - match.range.location - 2)
             attributedString.deleteCharacters(in: NSRange(location: linkRange.location - 1, length: linkRange.length + 2))
-            
+
             if let linkUrlString = self?.unescaped(string: linkUrlString), let url = URL(string: linkUrlString) ?? URL(string: linkUrlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? linkUrlString) {
                 attributedString.addAttribute(NSLinkAttributeName, value: url, range: linkTextRange)
             }
             formattingBlock(attributedString, linkTextRange)
-            
+
             attributedString.deleteCharacters(in: NSRange(location: match.range.location, length: 1))
         }
     }
@@ -289,17 +289,17 @@ open class RCMarkdownParser: RCBaseParser {
             attributedString.deleteCharacters(in: string().range(of: ">"))
         }
     }
-    
+
     fileprivate func addEnclosedParsingWithPattern(_ pattern: String, options: NSRegularExpression.Options = [], formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
-        guard let regex = RCMarkdownRegex.regexForString(pattern) else { return }
-        
+        guard let regex = RCMarkdownRegex.regexForString(pattern, options: options) else { return }
+
         addParsingRuleWithRegularExpression(regex) { match, attributedString in
             attributedString.deleteCharacters(in: match.rangeAt(3))
             formattingBlock(attributedString, match.rangeAt(2))
             attributedString.deleteCharacters(in: match.rangeAt(1))
         }
     }
-    
+
     open func addInlineCodeParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         addEnclosedParsingWithPattern(RCMarkdownRegex.InlineCode, options: RCMarkdownRegex.InlineCodeOptions, formattingBlock: formattingBlock)
     }
@@ -307,11 +307,11 @@ open class RCMarkdownParser: RCBaseParser {
     open func addCodeParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         addEnclosedParsingWithPattern(RCMarkdownRegex.Code, formattingBlock: formattingBlock)
     }
-    
+
     open func addStrongParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         addEnclosedParsingWithPattern(RCMarkdownRegex.Strong, options: RCMarkdownRegex.StrongOptions, formattingBlock: formattingBlock)
     }
-    
+
     open func addItalicParsingWithFormattingBlock(_ formattingBlock: @escaping RCMarkdownParserFormattingBlock) {
         addEnclosedParsingWithPattern(RCMarkdownRegex.Italic, options: RCMarkdownRegex.ItalicOptions, formattingBlock: formattingBlock)
     }
@@ -331,10 +331,10 @@ open class RCMarkdownParser: RCBaseParser {
             }
         } catch { }
     }
-    
+
     func unescaped(string: String) -> String? {
         guard let unescapingRegex = RCMarkdownRegex.regexForString(RCMarkdownRegex.Unescaping, options: .dotMatchesLineSeparators) else { return nil }
-        
+
         var location = 0
         let unescapedMutableString = NSMutableString(string: string)
         while let match = unescapingRegex.firstMatch(in: unescapedMutableString as String, options: .withoutAnchoringBounds, range: NSRange(location: location, length: unescapedMutableString.length - location)) {
@@ -346,10 +346,10 @@ open class RCMarkdownParser: RCBaseParser {
             let newLength = unescapedMutableString.length
             location = match.range.location + match.range.length + newLength - oldLength
         }
-        
+
         return unescapedMutableString as String
     }
-    
+
     fileprivate class func stringWithHexaString(_ hexaString: String, atIndex index: Int) -> String {
         let range = hexaString.characters.index(hexaString.startIndex, offsetBy: index)..<hexaString.characters.index(hexaString.startIndex, offsetBy: index + 4)
         let sub = hexaString.substring(with: range)

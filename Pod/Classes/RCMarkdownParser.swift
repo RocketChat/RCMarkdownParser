@@ -23,7 +23,7 @@ public struct RCMarkdownRegex {
 
     public static let Image = "!\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let ImageOptions: NSRegularExpression.Options = [.anchorsMatchLines]
-    public static let Link = "\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
+    public static let Link = "(?<!!)\\[([^\\]]+)\\]\\(((?:\(_allowedSchemes)):\\/\\/[^\\)]+)\\)"
     public static let LinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let AlternateLink = "(?:<|&lt;)((?:\(_allowedSchemes)):\\/\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)"
     public static let AlternateLinkOptions: NSRegularExpression.Options = [.anchorsMatchLines]
@@ -226,20 +226,23 @@ open class RCMarkdownParser: RCBaseParser {
             let linkRange = NSRange(location: imagePathStart, length: match.range.length + match.range.location - imagePathStart - 1)
             let imagePath = (attributedString.string as NSString).substring(with: NSRange(location: linkRange.location + 1, length: linkRange.length - 1))
 
+            let linkTextEndLocation = (attributedString.string as NSString).range(of: "]", options: [], range: match.range).location
+            let linkTextRange = NSRange(location: match.range.location + 2, length: linkTextEndLocation - match.range.location - 2)
+            let alternativeText = (attributedString.string as NSString).substring(with: linkTextRange)
+            attributedString.replaceCharacters(in: match.range, with: alternativeText)
+            
+            let alternativeRange = NSRange(location: match.range.location, length: (alternativeText as NSString).length)
+            attributedString.addAttribute(NSLinkAttributeName, value: imagePath, range: alternativeRange)
+            alternateFormattingBlock?(attributedString, alternativeRange)
+            
             self.downloadImage(imagePath) { image in
                 if let image = image {
                     let imageAttatchment = NSTextAttachment()
                     imageAttatchment.image = image
                     imageAttatchment.bounds = CGRect(x: 0, y: -5, width: image.size.width, height: image.size.height)
                     let imageString = NSAttributedString(attachment: imageAttatchment)
-                    attributedString.replaceCharacters(in: match.range, with: imageString)
-                    formattingBlock?(attributedString, NSRange(location: match.range.location, length: imageString.length))
-                } else {
-                    let linkTextEndLocation = (attributedString.string as NSString).range(of: "]", options: [], range: match.range).location
-                    let linkTextRange = NSRange(location: match.range.location + 2, length: linkTextEndLocation - match.range.location - 2)
-                    let alternativeText = (attributedString.string as NSString).substring(with: linkTextRange)
-                    attributedString.replaceCharacters(in: match.range, with: alternativeText)
-                    alternateFormattingBlock?(attributedString, NSRange(location: match.range.location, length: (alternativeText as NSString).length))
+                    attributedString.replaceCharacters(in: NSRange(location: match.range.location, length: alternativeText.count), with: imageString)
+                    formattingBlock?(attributedString, NSRange(location: match.range.location, length: 1))
                 }
             }
         }
@@ -358,3 +361,4 @@ open class RCMarkdownParser: RCBaseParser {
         return "\(char)"
     }
 }
+

@@ -281,6 +281,9 @@ open class RCMarkdownParser: RCBaseParser {
             let linkUrlString = string().substring(with: linkUrlRange)
 
             let linkTextRange = NSRange(location: linkEnd.location + 1, length: match.range.length - linkEnd.location - 2)
+
+            guard string().length >= linkTextRange.location + linkTextRange.length else { return }
+
             let linkTextString = string().substring(with: linkTextRange)
 
             attributedString.deleteCharacters(in: NSRange(location: linkRange.location, length: linkRange.length))

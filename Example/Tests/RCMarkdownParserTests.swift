@@ -83,15 +83,15 @@ class RCMarkdownParserTests: XCTestCase {
         XCTAssertEqual(attributedString?.string, "Hello\nI drink in a café everyday")
     }
     
-    func testDefaultEmphasisParsing() {
-        let font = UIFont.italicSystemFont(ofSize: 12)
+    func testDefaultSingleBoldParsing() {
+        let font = UIFont.boldSystemFont(ofSize: 12)
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\nI drink in *a café* everyday")
         XCTAssertEqual(attributedString?.attribute(NSFontAttributeName, at: 20, effectiveRange: nil) as? UIFont, font)
         XCTAssertEqual(attributedString?.string, "Hello\nI drink in a café everyday")
     }
     
-    func testDefaultBoldParsingUnderscores() {
-        let font = UIFont.boldSystemFont(ofSize: 12)
+    func testDefaultItalicParsingUnderscores() {
+        let font = UIFont.italicSystemFont(ofSize: 12)
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\nI drink in __a café__ everyday")
 
         XCTAssertEqual(attributedString?.attribute(NSFontAttributeName, at: 20, effectiveRange: nil) as? UIFont, font)

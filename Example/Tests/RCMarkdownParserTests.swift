@@ -24,7 +24,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testBasicBoldParsing() {
         let font = UIFont(name: "HelveticaNeue-Bold", size: 14) ?? UIFont.systemFont(ofSize: 14)
         
-        guard let boldRegex = TSSwiftMarkdownRegex.regexForString("\\*{2}.*\\*{2}", options: .caseInsensitive) else {
+        guard let boldRegex = RCMarkdownRegex.regexForString("\\*{2}.*\\*{2}", options: .caseInsensitive) else {
             XCTAssert(false)
             return
         }
@@ -44,7 +44,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testBasicEmphasisParsing() {
         let font = UIFont.italicSystemFont(ofSize: 12)
         
-        guard let italicRegex = TSSwiftMarkdownRegex.regexForString("\\*{1}.*\\*{1}", options: .caseInsensitive) else {
+        guard let italicRegex = RCMarkdownRegex.regexForString("\\*{1}.*\\*{1}", options: .caseInsensitive) else {
             XCTAssert(false)
             return
         }
@@ -73,7 +73,7 @@ class RCMarkdownParserTests: XCTestCase {
     
     func testItalicFont() {
         let font = UIFont.italicSystemFont(ofSize: 12)
-        XCTAssertEqual(parser.emphasisAttributes[NSFontAttributeName] as? UIFont, font)
+        XCTAssertEqual(parser.italicAttributes[NSFontAttributeName] as? UIFont, font)
     }
     
     func testDefaultBoldParsing() {
@@ -106,7 +106,7 @@ class RCMarkdownParserTests: XCTestCase {
     }
     
     func testDefaultMonospaceParsing() {
-        let font = standardParser.monospaceAttributes[NSFontAttributeName] as? UIFont
+        let font = standardParser.codeAttributes[NSFontAttributeName] as? UIFont
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\nI drink in `a café` everyday")
         XCTAssertEqual(attributedString?.attribute(NSFontAttributeName, at: 20, effectiveRange: nil) as? UIFont, font)
         XCTAssertEqual(attributedString?.string, "Hello\nI drink in a café everyday")
@@ -119,13 +119,13 @@ class RCMarkdownParserTests: XCTestCase {
     }
     
     func testDefaultEmphasisParsingOneCharacter() {
-        let font = self.standardParser.emphasisAttributes[NSFontAttributeName] as? UIFont
+        let font = self.standardParser.italicAttributes[NSFontAttributeName] as? UIFont
         let attributedString = standardParser.attributedStringFromMarkdown("This is *a* nice *boy*")
         XCTAssertNotEqual(attributedString?.attribute(NSFontAttributeName, at: 9, effectiveRange: nil) as? UIFont, font)
     }
     
     func testDefaultMonospaceParsingOneCharacter() {
-        let font = self.standardParser.monospaceAttributes[NSFontAttributeName] as? UIFont
+        let font = self.standardParser.codeAttributes[NSFontAttributeName] as? UIFont
         let attributedString = standardParser.attributedStringFromMarkdown("This is `a` nice `boy`")
         XCTAssertNotEqual(attributedString?.attribute(NSFontAttributeName, at: 9, effectiveRange: nil) as? UIFont, font)
     }
@@ -133,8 +133,8 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultStrongAndEmphasisAndMonospaceInSameInputParsing() {
         let fonts = (
             strong: parser.strongAttributes[NSFontAttributeName] as? UIFont,
-            emphasis: parser.emphasisAttributes[NSFontAttributeName] as? UIFont,
-            monospace: parser.monospaceAttributes[NSFontAttributeName] as? UIFont
+            emphasis: parser.italicAttributes[NSFontAttributeName] as? UIFont,
+            monospace: parser.codeAttributes[NSFontAttributeName] as? UIFont
         )
         
         var snippets = (
@@ -441,7 +441,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultH1() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n# Men att Pär är här\nmen inte Pia")
         let font = attributedString?.attribute(NSFontAttributeName, at: 10, effectiveRange: nil) as? UIFont
-        let expectedFont = standardParser.headerAttributes[0][NSFontAttributeName] as? UIFont
+        let expectedFont = standardParser.headerAttributes[0]![NSFontAttributeName] as? UIFont
         XCTAssertNotNil(font);
         XCTAssertEqual(font, expectedFont);
         XCTAssertEqual(font?.pointSize, 23.0);
@@ -452,7 +452,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testThatH1IsParsedCorrectly() {
         let header = "header"
         let input = "first line\n# \(header)\nsecond line"
-        let h1Font = standardParser.headerAttributes[0][NSFontAttributeName] as? UIFont
+        let h1Font = standardParser.headerAttributes[0]![NSFontAttributeName] as? UIFont
         let attributedString = standardParser.attributedStringFromMarkdown(input)
         let string = attributedString?.string
         let headerRange = string?.range(of: header)
@@ -467,7 +467,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testThatHeaderIsNotParsedWithoutSpaceInBetween() {
         let header = "header"
         let notValidHeader = "#\(header)"
-        let h1Font = standardParser.headerAttributes[0][NSFontAttributeName] as? UIFont
+        let h1Font = standardParser.headerAttributes[0]![NSFontAttributeName] as? UIFont
         let attributedString = standardParser.attributedStringFromMarkdown(notValidHeader)
         let headerRange = (attributedString!.string as NSString).range(of: header)
         attributedString?.enumerateAttributes(in: headerRange, options: .reverse) { attributes, range, stop in
@@ -488,7 +488,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultH2() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n## Men att Pär är här\nmen inte Pia")
         let font = attributedString?.attribute(NSFontAttributeName, at: 10, effectiveRange: nil) as? UIFont
-        let expectedFont = standardParser.headerAttributes[1][NSFontAttributeName] as? UIFont
+        let expectedFont = standardParser.headerAttributes[1]![NSFontAttributeName] as? UIFont
         XCTAssertNotNil(font);
         XCTAssertEqual(font, expectedFont);
         XCTAssertFalse((attributedString?.string.contains("#"))!)
@@ -498,7 +498,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultH3() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n### Men att Pär är här\nmen inte Pia")
         let font = attributedString?.attribute(NSFontAttributeName, at: 10, effectiveRange: nil) as? UIFont
-        let expectedFont = standardParser.headerAttributes[2][NSFontAttributeName] as? UIFont
+        let expectedFont = standardParser.headerAttributes[2]![NSFontAttributeName] as? UIFont
         XCTAssertNotNil(font);
         XCTAssertEqual(font, expectedFont);
         XCTAssertEqual(font?.pointSize, 19.0)
@@ -509,7 +509,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultH4() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n#### Men att Pär är här\nmen inte Pia")
         let font = attributedString?.attribute(NSFontAttributeName, at: 10, effectiveRange: nil) as? UIFont
-        let expectedFont = standardParser.headerAttributes[3][NSFontAttributeName] as? UIFont
+        let expectedFont = standardParser.headerAttributes[3]![NSFontAttributeName] as? UIFont
         XCTAssertNotNil(font);
         XCTAssertEqual(font, expectedFont);
         XCTAssertEqual(font?.pointSize, 17.0)
@@ -520,7 +520,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultH5() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n##### Men att Pär är här\nmen inte Pia")
         let font = attributedString?.attribute(NSFontAttributeName, at: 10, effectiveRange: nil) as? UIFont
-        let expectedFont = standardParser.headerAttributes[4][NSFontAttributeName] as? UIFont
+        let expectedFont = standardParser.headerAttributes[4]![NSFontAttributeName] as? UIFont
         XCTAssertNotNil(font);
         XCTAssertEqual(font, expectedFont);
         XCTAssertEqual(font?.pointSize, 15.0)
@@ -531,7 +531,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultH6() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n###### Men att Pär är här\nmen inte Pia")
         let font = attributedString?.attribute(NSFontAttributeName, at: 10, effectiveRange: nil) as? UIFont
-        let expectedFont = standardParser.headerAttributes[5][NSFontAttributeName] as? UIFont
+        let expectedFont = standardParser.headerAttributes[5]![NSFontAttributeName] as? UIFont
         XCTAssertNotNil(font);
         XCTAssertEqual(font, expectedFont);
         XCTAssertEqual(font?.pointSize, 13.0)
@@ -643,7 +643,7 @@ class RCMarkdownParserTests: XCTestCase {
         let boldItalicFont = attributedString?.attribute(NSFontAttributeName, at: 26, effectiveRange: nil) as? UIFont
         
         let controlledBoldFont = standardParser.strongAttributes[NSFontAttributeName] as? UIFont
-        let controlledBoldItalicFont = standardParser.strongAndEmphasisAttributes[NSFontAttributeName] as? UIFont
+        let controlledBoldItalicFont = standardParser.strongAndItalicAttributes[NSFontAttributeName] as? UIFont
         
         XCTAssertEqual(boldFont, controlledBoldFont)
         XCTAssertEqual(boldItalicFont, controlledBoldItalicFont)
@@ -655,8 +655,8 @@ class RCMarkdownParserTests: XCTestCase {
         let italicFont = attributedString?.attribute(NSFontAttributeName, at: 6, effectiveRange: nil) as? UIFont
         let boldItalicFont = attributedString?.attribute(NSFontAttributeName, at: 28, effectiveRange: nil) as? UIFont
         
-        let controlledItalicFont = standardParser.emphasisAttributes[NSFontAttributeName] as? UIFont
-        let controlledBoldItalicFont = standardParser.strongAndEmphasisAttributes[NSFontAttributeName] as? UIFont
+        let controlledItalicFont = standardParser.italicAttributes[NSFontAttributeName] as? UIFont
+        let controlledBoldItalicFont = standardParser.strongAndItalicAttributes[NSFontAttributeName] as? UIFont
         
         XCTAssertEqual(italicFont, controlledItalicFont)
         XCTAssertEqual(boldItalicFont, controlledBoldItalicFont)

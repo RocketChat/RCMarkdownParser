@@ -269,7 +269,7 @@ class RCMarkdownParserTests: XCTestCase {
         XCTAssertTrue((attributedString?.string.contains("link"))!)
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 20, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
         
         let linkAtTheNextCharacter = attributedString?.attribute(NSLinkAttributeName, at: 21, effectiveRange: nil)
@@ -288,7 +288,7 @@ class RCMarkdownParserTests: XCTestCase {
         XCTAssertTrue((attributedString?.string.contains("link"))!)
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 20, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
         
         let linkAtTheNextCharacter = attributedString?.attribute(NSLinkAttributeName, at: 21, effectiveRange: nil)
@@ -307,7 +307,7 @@ class RCMarkdownParserTests: XCTestCase {
         XCTAssertTrue((attributedString?.string.contains("link"))!)
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 20, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
         
         let linkAtTheNextCharacter = attributedString?.attribute(NSLinkAttributeName, at: 21, effectiveRange: nil)
@@ -316,44 +316,44 @@ class RCMarkdownParserTests: XCTestCase {
     
     func testDefaultAutoLinkParsing() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n This is a link https://www.example.net/ to test Wi-Fi\nat home")
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/"))
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 24, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
     }
     
     func testDefaultAutoLinkParsingWithEscapedHyphen() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n This is a link https://www\\.example\\.net/wi\\-fi to test Wi\\-Fi\nat home")
         
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/wi-fi"))
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 24, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
     }
     
     func testDefaultAutoLinkParsingWithUnescapedHyphen() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n This is a link https://www.example.net/wi-fi to test Wi-Fi\nat home")
         
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/wi-fi"))
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 24, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
     }
     
     func testDefaultAutoLinkParsingWithConvertedEscapedHyphen() {
         let attributedString = standardParser.attributedStringFromMarkdown(standardParser.attributedStringFromMarkdown("Hello\n This is a link https://www.example.net/wi-fi to test Wi-Fi\nat home")!.markdownString())
         
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 24, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/wi-fi"))
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 24, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 24, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
     }
     
@@ -368,14 +368,14 @@ class RCMarkdownParserTests: XCTestCase {
         XCTAssertTrue((attributedString?.string.contains("link"))!)
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 20, effectiveRange: nil)
         XCTAssertNotNil(underline)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 20, effectiveRange: nil) as? UIColor
         XCTAssertEqual(linkColor, UIColor.blue)
     }
     
     func testDefaultLinkParsingEnclosedInParenthesis() {
         let expectedRawString = "Hello\n This is a (link) to test Wi-Fi\nat home"
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n This is a ([link](https://www.example.net/)) to test Wi-Fi\nat home")
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 21, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 21, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/"))
         XCTAssertEqual(attributedString!.string, expectedRawString)
     }
@@ -383,7 +383,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultLinkParsingWithBracketsInside() {
         let expectedRawString = "Hello\n a link [with brackets inside]"
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n [a link \\[with brackets inside]](https://example.net/)")
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 35, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 35, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://example.net/"))
         XCTAssertEqual(attributedString!.string, expectedRawString)
     }
@@ -391,7 +391,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultLinkParsingWithBracketsOutside() {
         let expectedRawString = "Hello\n [This is not a link] but this is a link to test [the difference]"
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n [This is not a link] but this is a [link](https://www.example.net/) to test [the difference]")
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 44, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 44, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/"))
         XCTAssertEqual(attributedString!.string, expectedRawString)
     }
@@ -399,17 +399,17 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultLinkParsingMultipleLinks() {
         let attributedString = standardParser.attributedStringFromMarkdown("Hello\n This is a [link](https://www.example.net/) and this is [a link](https://www.example.com/) too")
         
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 17, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 17, effectiveRange: nil) as? URL
         let underline = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 17, effectiveRange: nil)
-        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 17, effectiveRange: nil) as! UIColor
+        let linkColor = attributedString?.attribute(NSForegroundColorAttributeName, at: 17, effectiveRange: nil) as? UIColor
         
         XCTAssertEqual(link, URL(string: "https://www.example.net/"))
         XCTAssertNotNil(underline)
         XCTAssertEqual(linkColor, UIColor.blue)
         
-        let link2 = attributedString?.attribute(NSLinkAttributeName, at: 37, effectiveRange: nil) as! URL
+        let link2 = attributedString?.attribute(NSLinkAttributeName, at: 37, effectiveRange: nil) as? URL
         let underline2 = attributedString?.attribute(NSUnderlineStyleAttributeName, at: 37, effectiveRange: nil)
-        let linkColor2 = attributedString?.attribute(NSForegroundColorAttributeName, at: 37, effectiveRange: nil) as! UIColor
+        let linkColor2 = attributedString?.attribute(NSForegroundColorAttributeName, at: 37, effectiveRange: nil) as? UIColor
         
         XCTAssertEqual(link2, URL(string: "https://www.example.com/"))
         XCTAssertNotNil(underline2)
@@ -419,7 +419,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultLinkParsingWithPipe() {
         let expectedRawString = "Hello (link). Bye"
         let attributedString = standardParser.attributedStringFromMarkdown("Hello ([link](https://www.example.net/|)). Bye")
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 8, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 8, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: ("https://www.example.net/|" as NSString).addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "htp://.wexamlns"))!))
         XCTAssertEqual(attributedString!.string, expectedRawString)
     }
@@ -427,7 +427,7 @@ class RCMarkdownParserTests: XCTestCase {
     func testDefaultLinkParsingWithSharp() {
         let expectedRawString = "Hello (link). Bye"
         let attributedString = standardParser.attributedStringFromMarkdown("Hello ([link](https://www.example.net/#)). Bye")
-        let link = attributedString?.attribute(NSLinkAttributeName, at: 8, effectiveRange: nil) as! URL
+        let link = attributedString?.attribute(NSLinkAttributeName, at: 8, effectiveRange: nil) as? URL
         XCTAssertEqual(link, URL(string: "https://www.example.net/#"))
         XCTAssertEqual(attributedString!.string, expectedRawString)
     }

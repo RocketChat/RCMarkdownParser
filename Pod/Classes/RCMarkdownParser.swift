@@ -11,6 +11,10 @@ public struct RCMarkdownRegex {
     public static let Header = "^(#{1,4}) (([\\S\\w\\d-_\\/\\*\\.,\\\\][ \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]?)+)"
     public static let HeaderOptions: NSRegularExpression.Options = [.anchorsMatchLines]
 
+    public static let List = "^( {0,%@})[\\*\\+\\-]\\s+(.+)$"
+    public static let ShortList = "^( {0,%@})[\\*\\+\\-]\\s+([^\\*\\+\\-].*)$"
+    public static let NumberedList = "^( {0,})[0-9]+\\.\\s(.+)$"
+
     public static let Quote = "(^>)(.*)$"
     public static let QuoteOptions: NSRegularExpression.Options = [.anchorsMatchLines]
     public static let QuoteBlock = "(>>>)\n+([\\s\\S]*?)\n+(<<<)"
@@ -55,7 +59,8 @@ open class RCMarkdownParser: RCBaseParser {
     public typealias RCMarkdownParserLevelFormattingBlock = ((NSMutableAttributedString, NSRange, Int) -> Void)
 
     open var headerAttributes = [UInt: [String: Any]]()
-
+    open var listAttributes = [[String: Any]]()
+    open var numberedListAttributes = [[String: Any]]()
     open var quoteAttributes = [String: Any]()
     open var quoteBlockAttributes = [String: Any]()
 
@@ -98,12 +103,28 @@ open class RCMarkdownParser: RCBaseParser {
 
         if withDefaultParsing {
 
+            addNumberedListParsingWithLeadFormattingBlock({ (attributedString, range, level) in
+                RCMarkdownParser.addAttributes(self.numberedListAttributes, atIndex: level - 1, toString: attributedString, range: range)
+                let substring = attributedString.attributedSubstring(from: range).string.replacingOccurrences(of: " ", with: "\(nonBreakingSpaceCharacter)")
+                attributedString.replaceCharacters(in: range, with: "\(substring)")
+            }, textFormattingBlock: { attributedString, range, level in
+                RCMarkdownParser.addAttributes(self.numberedListAttributes, atIndex: level - 1, toString: attributedString, range: range)
+            })
+
             addHeaderParsingWithLeadFormattingBlock({ attributedString, range, level in
                 attributedString.replaceCharacters(in: range, with: "")
             }, textFormattingBlock: { attributedString, range, level in
                 if let attributes = self.headerAttributes[UInt(level)] {
                     attributedString.addAttributes(attributes, range: range)
                 }
+            })
+
+            addListParsingWithLeadFormattingBlock({ attributedString, range, level in
+                RCMarkdownParser.addAttributes(self.listAttributes, atIndex: level - 1, toString: attributedString, range: range)
+                let indentString = String(repeating: String(nonBreakingSpaceCharacter), count: level)
+                attributedString.replaceCharacters(in: range, with: "\(indentString)\u{2022}\u{00A0}")
+            }, textFormattingBlock: { attributedString, range, level in
+                RCMarkdownParser.addAttributes(self.listAttributes, atIndex: level - 1, toString: attributedString, range: range)
             })
 
             addQuoteBlockParsingWithFormattingBlock { attributedString, range in
@@ -210,6 +231,14 @@ open class RCMarkdownParser: RCBaseParser {
         addLeadParsingWithPattern(RCMarkdownRegex.Header, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
 
+    open func addListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
+        addLeadParsingWithPattern(RCMarkdownRegex.List, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+    }
+
+    open func addNumberedListParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, maxLevel: Int? = nil, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
+        addLeadParsingWithPattern(RCMarkdownRegex.NumberedList, maxLevel: maxLevel, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
+    }
+
     open func addQuoteParsingWithLeadFormattingBlock(_ leadFormattingBlock: @escaping RCMarkdownParserLevelFormattingBlock, textFormattingBlock formattingBlock: RCMarkdownParserLevelFormattingBlock?) {
         addLeadParsingWithPattern(RCMarkdownRegex.Quote, maxLevel: 1, leadFormattingBlock: leadFormattingBlock, formattingBlock: formattingBlock)
     }
@@ -230,11 +259,11 @@ open class RCMarkdownParser: RCBaseParser {
             let linkTextRange = NSRange(location: match.range.location + 2, length: linkTextEndLocation - match.range.location - 2)
             let alternativeText = (attributedString.string as NSString).substring(with: linkTextRange)
             attributedString.replaceCharacters(in: match.range, with: alternativeText)
-            
+
             let alternativeRange = NSRange(location: match.range.location, length: (alternativeText as NSString).length)
             attributedString.addAttribute(NSLinkAttributeName, value: imagePath, range: alternativeRange)
             alternateFormattingBlock?(attributedString, alternativeRange)
-            
+
             self.downloadImage(imagePath) { image in
                 if let image = image {
                     let imageAttatchment = NSTextAttachment()
@@ -280,9 +309,8 @@ open class RCMarkdownParser: RCBaseParser {
             let linkUrlRange = NSRange(location: linkRange.location + 1, length: linkRange.length - 2)
             let linkUrlString = string().substring(with: linkUrlRange)
 
-            let linkTextRange = NSRange(location: linkEnd.location + 1, length: match.range.length - linkEnd.location - 2)
-
-            guard string().length >= linkTextRange.location + linkTextRange.length else { return }
+            let linkTextLength = match.range.length + match.range.location - linkEnd.location - 1
+            let linkTextRange = NSRange(location: linkEnd.location + 1, length: linkTextLength)
 
             let linkTextString = string().substring(with: linkTextRange)
 
@@ -359,7 +387,7 @@ open class RCMarkdownParser: RCBaseParser {
     fileprivate class func stringWithHexaString(_ hexaString: String, atIndex index: Int) -> String {
         let range = hexaString.characters.index(hexaString.startIndex, offsetBy: index)..<hexaString.characters.index(hexaString.startIndex, offsetBy: index + 4)
         let sub = hexaString.substring(with: range)
-        
+
         let char = Character(UnicodeScalar(Int(strtoul(sub, nil, 16)))!)
         return "\(char)"
     }

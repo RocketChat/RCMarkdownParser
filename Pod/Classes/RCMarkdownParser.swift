@@ -259,11 +259,11 @@ open class RCMarkdownParser: RCBaseParser {
             let linkTextRange = NSRange(location: match.range.location + 2, length: linkTextEndLocation - match.range.location - 2)
             let alternativeText = (attributedString.string as NSString).substring(with: linkTextRange)
             attributedString.replaceCharacters(in: match.range, with: alternativeText)
-            
+
             let alternativeRange = NSRange(location: match.range.location, length: (alternativeText as NSString).length)
             attributedString.addAttribute(NSLinkAttributeName, value: imagePath, range: alternativeRange)
             alternateFormattingBlock?(attributedString, alternativeRange)
-            
+
             self.downloadImage(imagePath) { image in
                 if let image = image {
                     let imageAttatchment = NSTextAttachment()
@@ -309,9 +309,8 @@ open class RCMarkdownParser: RCBaseParser {
             let linkUrlRange = NSRange(location: linkRange.location + 1, length: linkRange.length - 2)
             let linkUrlString = string().substring(with: linkUrlRange)
 
-            let linkTextRange = NSRange(location: linkEnd.location + 1, length: match.range.length - linkEnd.location - 2)
-
-            guard string().length >= linkTextRange.location + linkTextRange.length else { return }
+            let linkTextLength = match.range.length + match.range.location - linkEnd.location - 1
+            let linkTextRange = NSRange(location: linkEnd.location + 1, length: linkTextLength)
 
             let linkTextString = string().substring(with: linkTextRange)
 
@@ -388,7 +387,7 @@ open class RCMarkdownParser: RCBaseParser {
     fileprivate class func stringWithHexaString(_ hexaString: String, atIndex index: Int) -> String {
         let range = hexaString.characters.index(hexaString.startIndex, offsetBy: index)..<hexaString.characters.index(hexaString.startIndex, offsetBy: index + 4)
         let sub = hexaString.substring(with: range)
-        
+
         let char = Character(UnicodeScalar(Int(strtoul(sub, nil, 16)))!)
         return "\(char)"
     }

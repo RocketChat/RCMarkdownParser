@@ -303,8 +303,8 @@ open class RCMarkdownParser: RCBaseParser {
 
         addParsingRuleWithRegularExpression(linkRegex) { [weak self] match, attributedString in
             func string() -> NSString { return attributedString.string as NSString }
-            let linkStart = string().range(of: "<", options: .backwards, range: match.range)
             let linkEnd = string().range(of: "|", options: .backwards, range: match.range)
+            let linkStart = string().range(of: "<", options: .backwards, range: NSRange(location: match.range.location, length: linkEnd.location - match.range.location))
             let linkRange = NSRange(location: linkStart.location, length: linkEnd.location - linkStart.location + 1)
             let linkUrlRange = NSRange(location: linkRange.location + 1, length: linkRange.length - 2)
             let linkUrlString = string().substring(with: linkUrlRange)
@@ -320,7 +320,7 @@ open class RCMarkdownParser: RCBaseParser {
                 attributedString.addAttribute(NSLinkAttributeName, value: url, range: string().range(of: linkTextString))
             }
 
-            attributedString.deleteCharacters(in: string().range(of: ">"))
+            attributedString.deleteCharacters(in: string().range(of: ">", options: .backwards, range: string().range(of: linkTextString)))
         }
     }
 
@@ -392,4 +392,3 @@ open class RCMarkdownParser: RCBaseParser {
         return "\(char)"
     }
 }
-

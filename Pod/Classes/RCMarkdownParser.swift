@@ -320,7 +320,7 @@ open class RCMarkdownParser: RCBaseParser {
                 attributedString.addAttribute(NSLinkAttributeName, value: url, range: string().range(of: linkTextString))
             }
 
-            attributedString.deleteCharacters(in: string().range(of: ">", options: .backwards, range: string().range(of: linkTextString)))
+            attributedString.deleteCharacters(in: string().range(of: ">", options: .backwards))
         }
     }
 
